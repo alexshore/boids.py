@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "main"
+version = "0.1.0"
+description = ""
+authors = ["alex <kntrllr@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+black = "*"
+pycodestyle = "*"
+torch = "*"
+deap = "*"
+pygame = "*"
+arcade = "^2.6.17"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
