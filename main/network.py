@@ -1,55 +1,46 @@
 import numpy as np
-import tensorflow as tf
+
+import torch
+import torch.nn as nn
 
 import time
 
 
-def convert_weights_to_network(weights) -> tf.keras.models.Sequential:
-    """
+class Network(nn.Module):
+    def __init__(self):
+        super(Network, self).__init__()
+        self.layer1 = nn.Linear(in_features=14, out_features=10, bias=False)
+        self.layer2 = nn.Linear(in_features=10, out_features=5, bias=False)
+        self.layer3 = nn.Linear(in_features=5, out_features=1, bias=False)
 
-    input should be the following:
-    - current coordinates (2)
-    - current direction (1)
-    - distance to closest boids (3)
-    - angle to closest boids (3)
-    - difference in direction to closest boids (3)
-    - distance to closest obstacle (1)
-    - angle to closest obstacle (1)
-
-    input should be of shape (2 + 1 + 3 + 3 + 3 + 1 + 1,) = (14,)
-
-    weights will be one flat list so need to convert to shape
-    (14, 28) + (28, 14) + (14, 7) + (7, 2)
-
-    sections of the list will be:
-     0 - 391,
-     392 - 783,
-     784 - 881,
-     882 - 896,
+    # @torch.no_grad()
+    def forward(self, x) -> torch.Tensor:
+        x = self.layer1(x)
+        x = torch.relu(x)
+        x = self.layer2(x)
+        x = torch.relu(x)
+        x = self.layer3(x)
+        x = torch.tanh(x)
+        return x
 
 
-    """
-    network = tf.keras.models.Sequential(
-        [
-            tf.keras.layers.Input(shape=(14,)),
-            tf.keras.layers.Dense(14, activation="relu", use_bias=False),
-            tf.keras.layers.Dense(7, activation="relu", use_bias=False),
-            tf.keras.layers.Dense(1, activation="tanh", use_bias=False),
-        ]
-    )
-    layered_weights = [
-        np.reshape(weights[:196], (14, 14)),
-        np.reshape(weights[196:294], (14, 7)),
-        np.reshape(weights[294:301], (7, 1)),
-    ]
-    network.set_weights(layered_weights)
+def convert_weights_to_torch(weights) -> nn.Module:
+    network = Network()
+    state_dict = {
+        "layer1.weight": torch.tensor(np.reshape(weights[:140], (10, 14))),
+        "layer2.weight": torch.tensor(np.reshape(weights[140:190], (5, 10))),
+        "layer3.weight": torch.tensor(np.reshape(weights[190:], (1, 5))),
+    }
+    network.load_state_dict(state_dict)
     return network
 
 
 def main():
-    network = convert_weights_to_network(np.random.normal(0, 0.5, 301))
-    result = network.predict([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])[0][0]
-    print(result)
+    network = convert_weights_to_torch(np.random.normal(0.0, 0.5, 195))
+    start = time.time()
+    output = network.forward(torch.tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], dtype=torch.float, requires_grad=False))
+    print(output.item())
+    print(time.time() - start)
 
 
 if __name__ == "__main__":

@@ -8,13 +8,19 @@ from constants import BOID_ROTATION_SPEED, NUMBER_OF_BOIDS, SCREEN_HEIGHT, SCREE
 from deap import base, creator, tools
 from obstacle import MovingObstacle
 
+import os
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+
+arcade.enable_timings()
+
 
 class Simulation(arcade.Window):
     def __init__(self):
         super().__init__(width=SCREEN_WIDTH, height=SCREEN_HEIGHT, update_rate=1 / 60)  # type: ignore
 
         self.boid_list = arcade.SpriteList()
-        self.boid_list.extend([Boid(net_id=1, weights=np.random.normal(0, 0.5, 301)) for _ in range(NUMBER_OF_BOIDS)])
+        self.boid_list.extend([Boid(net_id=1, weights=np.random.normal(0, 0.5, 195)) for _ in range(NUMBER_OF_BOIDS)])
 
         self.obstacle_list = arcade.SpriteList()
         self.obstacle_list.append(
@@ -40,7 +46,7 @@ class Simulation(arcade.Window):
         )
 
         for boid in self.boid_list:
-            boid.other_boids = self.boid_list
+            boid.boid_list = self.boid_list
             boid.obstacles = self.obstacle_list
 
         self.ticks = 0
@@ -72,12 +78,23 @@ class Simulation(arcade.Window):
             font_size=30,
             anchor_x="center",
         )
+        self.current_fps = arcade.Text(
+            text=f"{arcade.get_fps()}",
+            start_x=0,
+            start_y=SCREEN_HEIGHT,
+            font_size=30,
+            anchor_x="left",
+            anchor_y="top",
+        )
 
         print("hi")
 
     def spawn_new_generation(self):
         self.boid_list.clear()
-        self.boid_list.extend([Boid() for _ in range(NUMBER_OF_BOIDS)])
+        self.boid_list.extend([Boid(net_id=1, weights=np.random.normal(0, 0.5, 195)) for _ in range(NUMBER_OF_BOIDS)])
+        for boid in self.boid_list:
+            boid.boid_list = self.boid_list
+            boid.obstacles = self.obstacle_list
 
     def on_draw(self):
         self.clear()
@@ -86,19 +103,33 @@ class Simulation(arcade.Window):
         self.current_tick.draw()
         self.current_generation.draw()
         self.current_boids.draw()
+        self.current_fps.draw()
 
     def on_update(self, delta_time):
+        if (not_inc_ticks := len(self.boid_list) < 6) or self.ticks >= self.end_ticks:
+            print("new gen", self.generation)
+            self.spawn_new_generation()
+            self.generation += 1
+            self.ticks = 0
+            self.end_ticks += 100 if not not_inc_ticks and self.end_ticks <= self.max_end_ticks else 0
+
         if not (alive_boids := len(self.boid_list)):
+            print("1exit")
             arcade.exit()
 
-        if alive_boids < 4:
+        if alive_boids <= 5:
+            print("2exit")
             arcade.exit()
 
         self.ticks += 1
+        print(self.ticks)
 
         for boid in self.boid_list:
-            for collision in self.get_collisions(boid):
+            for collision in self.get_boid_collisions(boid):
                 self.boid_list.remove(collision)
+
+            if arcade.check_for_collision_with_list(boid, self.obstacle_list) and boid in self.boid_list:
+                self.boid_list.remove(boid)
 
         self.boid_list.update()
         self.obstacle_list.update()
@@ -107,13 +138,7 @@ class Simulation(arcade.Window):
         self.current_generation.text = f"{self.generation}"
         self.current_boids.text = f"{alive_boids}"
 
-        # if (not_inc_ticks := len(self.boid_list) < 10) or self.ticks >= self.end_ticks:
-        #     self.spawn_new_generation()
-        #     self.generation += 1
-        #     self.ticks = 0
-        #     self.end_ticks += 100 if not not_inc_ticks and self.end_ticks <= self.max_end_ticks else 0
-
-    def get_collisions(self, boid):
+    def get_boid_collisions(self, boid):
         if collisions := arcade.check_for_collision_with_list(boid, self.boid_list):
             return [boid] + collisions
         return []

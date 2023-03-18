@@ -16,7 +16,7 @@ class Boid(arcade.Sprite):
             hit_box_algorithm="Detailed",
         )
 
-        self.other_boids = arcade.SpriteList()
+        self.boid_list = arcade.SpriteList()
 
         self.set_position(
             center_x=random.randint(0, SCREEN_WIDTH),

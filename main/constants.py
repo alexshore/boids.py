@@ -8,7 +8,7 @@ BOID_ROTATION_SPEED = 5
 
 OBSTACLE_SPEED = 4
 
-NUMBER_OF_BOIDS = 10
+NUMBER_OF_BOIDS = 50
 
 
 class Direction(Enum):
