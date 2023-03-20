@@ -64,7 +64,9 @@ class Boid(arcade.Sprite):
                     self.radians,
                     *closest_boids_weights,
                     closest_obstacle[0][1],
-                    arcade.get_angle_radians(self.center_x, self.center_y, closest_obstacle[0][0].center_x, closest_obstacle[0][0].center_y),
+                    arcade.get_angle_radians(
+                        self.center_x, self.center_y, closest_obstacle[0][0].center_x, closest_obstacle[0][0].center_y
+                    ),
                 ]
             ],
             dtype=torch.float,
@@ -82,35 +84,3 @@ class Boid(arcade.Sprite):
 
         if self.left < 0 or self.right > SCREEN_WIDTH or self.bottom < 0 or self.top > SCREEN_HEIGHT:
             self.boid_list.remove(self)
-
-    # def update(self):
-    #     closest_boids = self.get_closest_n(n=3, sprites=self.boid_list)
-    #     closest_obstacle = self.get_closest_n(n=1, sprites=self.obstacles)[0]
-
-    #     closest_boids_weights = self.get_distance_angle_to_and_direction_of_closest(closest_boids)
-    #     network_input = tf.convert_to_tensor(
-    #         np.array(
-    #             [
-    #                 [
-    #                     self.center_x,
-    #                     self.center_y,
-    #                     self.radians,
-    #                     *closest_boids_weights,
-    #                     closest_obstacle[1],
-    #                     arcade.get_angle_radians(self.center_x, self.center_y, closest_obstacle[0].center_x, closest_obstacle[0].center_y),
-    #                 ]
-    #             ]
-    #         )
-    #     )
-
-    #     movement = self.brain.predict([network_input])[0][0] * 5
-
-    #     self.angle += movement
-
-    #     self.set_position(
-    #         center_x=self.center_x + (-self.speed * np.sin(self.radians)),
-    #         center_y=self.center_y + (self.speed * np.cos(self.radians)),
-    #     )
-
-    #     if self.left < 0 or self.right > SCREEN_WIDTH or self.bottom < 0 or self.top > SCREEN_HEIGHT:
-    #         self.kill()
