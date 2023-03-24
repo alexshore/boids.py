@@ -2,7 +2,7 @@ import arcade
 from pathlib import Path
 import random
 
-from constants import OBSTACLE_SPEED, Direction
+from constants import OBSTACLE_SPEED, DIRECTION
 
 
 class Obstacle(arcade.Sprite):
@@ -11,21 +11,21 @@ class Obstacle(arcade.Sprite):
             filename=str(Path(__file__).parent / "obstacle.png"),
             center_x=position[0],
             center_y=position[1],
-            scale=3,
+            scale=5,
         )
 
 
 class MovingObstacle(Obstacle):
-    def __init__(self, start_position, end_position, direction: Direction):
+    def __init__(self, start_position, end_position, direction: DIRECTION):
         super(MovingObstacle, self).__init__(position=start_position)
 
         self.start_position = start_position
         self.end_position = end_position
         self.direction = direction
 
-        if self.direction == Direction.VERTICAL:
+        if self.direction == DIRECTION.VERTICAL:
             self.change_y = OBSTACLE_SPEED
-        if self.direction == Direction.HORIZONTAL:
+        if self.direction == DIRECTION.HORIZONTAL:
             self.change_x = OBSTACLE_SPEED
 
     def update(self):
@@ -42,14 +42,14 @@ class HorizontalObstacle(MovingObstacle):
         super(HorizontalObstacle, self).__init__(
             start_position=(start_x, y),
             end_position=(end_x, y),
-            direction=Direction.HORIZONTAL,
+            direction=DIRECTION.HORIZONTAL,
         )
 
 
 class VerticalObstacle(MovingObstacle):
     def __init__(self, x, start_y, end_y):
-        super(HorizontalObstacle, self).__init__(
+        super(VerticalObstacle, self).__init__(
             start_position=(x, start_y),
             end_position=(x, end_y),
-            direction=Direction.VERTICAL,
+            direction=DIRECTION.VERTICAL,
         )
