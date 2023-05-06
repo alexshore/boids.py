@@ -1,13 +1,7 @@
 import json
-from pathlib import Path
-import random
-import time
 import arcade
-import numpy as np
 from ai_boid import Boid
-from constants import FINAL_TICK_END, FINAL_TICK_INCREMENT, NUMBER_OF_BOIDS, SCREEN_HEIGHT, SCREEN_WIDTH, NUMBER_OF_INDIVIDUALS
-from deap import base, creator, tools
-from obstacle import HorizontalObstacle, VerticalObstacle
+from constants import NUMBER_OF_BOIDS, SCREEN_HEIGHT, SCREEN_WIDTH
 
 
 class Simulation(arcade.Window):
@@ -158,7 +152,7 @@ def evaluate(boids):
 
 
 def main():
-    simulation = Simulation()
+    Simulation()
     arcade.enable_timings()
     arcade.run()
 
