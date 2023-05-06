@@ -42,7 +42,7 @@ class Boid(arcade.Sprite):
     def get_neighbours(self):
         neighbours = []
         for other in self.others:
-            if arcade.get_distance_between_sprites(self, other) < 300 and other is not self:
+            if arcade.get_distance_between_sprites(self, other) < 100 and other is not self:
                 neighbours.append(other)
         return neighbours
 
@@ -63,7 +63,7 @@ class Boid(arcade.Sprite):
 
         avg_x, avg_y, close_neighbours = 0, 0, 0
         for neighbour in neighbours:
-            if arcade.get_distance_between_sprites(self, neighbour) < 80:
+            if arcade.get_distance_between_sprites(self, neighbour) < 20:
                 avg_x += neighbour.center_x
                 avg_y += neighbour.center_y
                 close_neighbours += 1

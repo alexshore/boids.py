@@ -28,7 +28,7 @@ class Network(nn.Module):
         return x
 
 
-def convert_weights_to_torch(weights) -> nn.Module:
+def convert_weights_to_torch(weights) -> Network:
     network = Network()
     state_dict = {
         "layer1.weight": torch.tensor(np.reshape(weights[:128], (16, 8))),
@@ -36,12 +36,6 @@ def convert_weights_to_torch(weights) -> nn.Module:
         "layer3.weight": torch.tensor(np.reshape(weights[256:288], (4, 8))),
         "layer4.weight": torch.tensor(np.reshape(weights[288:], (2, 4))),
     }
-    # state_dict = {
-    #     "layer1.weight": torch.tensor(np.reshape(weights[:96], (16, 6))),
-    #     "layer2.weight": torch.tensor(np.reshape(weights[96:224], (8, 16))),
-    #     "layer3.weight": torch.tensor(np.reshape(weights[224:256], (4, 8))),
-    #     "layer4.weight": torch.tensor(np.reshape(weights[256:], (2, 4))),
-    # }
     network.load_state_dict(state_dict)
     return network
 

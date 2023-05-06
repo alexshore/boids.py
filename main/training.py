@@ -155,7 +155,9 @@ class Simulation(arcade.Window):
     def new_generation(self, increase_ticks):
         self.population[self.individual].fitness.values = self.toolbox.evaluate(self.all_boids)
 
-        self.logbook.record(gen=self.generation, **self.statistics.compile(self.population))
+        record = self.statistics.compile(self.population)
+        print(record)
+        self.logbook.record(gen=self.generation, **record)
 
         offspring = self.toolbox.select(self.population, len(self.population))
         offspring = list(map(self.toolbox.clone, offspring))
@@ -240,7 +242,20 @@ def evaluate(boids):
         separation += boid.fitnesses["separation"] / boid.ticks_alive
         alignment += boid.fitnesses["alignment"] / boid.ticks_alive
 
-    return (cohesion, separation, alignment)
+    return (cohesion / NUMBER_OF_BOIDS, separation / NUMBER_OF_BOIDS, alignment / NUMBER_OF_BOIDS)
+
+
+def create_output_file(logbook):
+    output = []
+    for record in logbook:
+        new_record = {}
+        for key in record:
+            if isinstance(record[key], np.ndarray):
+                new_record[key] = record[key].tolist()
+            else:
+                new_record[key] = record[key]
+        output.append(new_record)
+    return output
 
 
 def main():
@@ -254,18 +269,18 @@ def main():
 
     toolbox.register("mutate", tools.mutGaussian, mu=0.0, sigma=0.5, indpb=0.005)
     toolbox.register("mate", tools.cxTwoPoint)
-    toolbox.register("mate", tools.cxUniform, indpb=0.01)
+    # toolbox.register("mate", tools.cxUniform, indpb=0.01)
     # toolbox.register("select", tools.selTournament, tournsize=4)
-    # toolbox.register("select", tools.selNSGA2)
+    toolbox.register("select", tools.selNSGA2)
     # toolbox.register("select", tools.selNSGA3)
-    toolbox.register("select", tools.selSPEA2)
+    # toolbox.register("select", tools.selSPEA2)
     toolbox.register("evaluate", evaluate)
 
     statistics = tools.Statistics(key=lambda ind: ind.fitness.values)
-    statistics.register("avg", np.mean)
-    statistics.register("std", np.std)
-    statistics.register("min", np.min)
-    statistics.register("max", np.max)
+    statistics.register("avg", np.mean, axis=0)
+    # statistics.register("std", np.std, axis=0)
+    statistics.register("min", np.min, axis=0)
+    statistics.register("max", np.max, axis=0)
 
     logbook = tools.Logbook()
 
@@ -277,6 +292,9 @@ def main():
     if simulation.to_save:
         with open("saved/weights.json", "w") as file:
             json.dump(simulation.to_save, file)
+
+    with open("logbook.json", "w") as file:
+        json.dump(create_output_file(simulation.logbook), file)
 
 
 if __name__ == "__main__":
